@@ -10,6 +10,13 @@ redirect_uri = 'http://localhost:13486/token'
 
 app = Flask(__name__, '')
 
+code_dict={}
+
+@app.route('/<code>')
+def get_code_data(code):
+    return json.dumps(code_dict[code])
+
+
 @app.route('/')
 def index():
     code = request.args.get('code')
@@ -21,7 +28,9 @@ def index():
         'redirect_uri': redirect_uri
     }
     response = requests.post(twitch_auth_url, params=params)
-    return response.json()
+    if response.status_code==200
+        code_dict['code'] = response.json()
+        return response.json()
 
 
 
