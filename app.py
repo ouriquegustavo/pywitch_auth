@@ -14,7 +14,7 @@ app = Flask(__name__, '')
 def index():
     code = request.args.get('code')
     params = {
-        'client_id': twitch_client_id
+        'client_id': twitch_client_id,
         'client_secret': twitch_client_secret,
         'code': code,
         'grant_type': 'authorization_code'
