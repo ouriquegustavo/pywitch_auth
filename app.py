@@ -21,7 +21,7 @@ def index():
         'redirect_uri': redirect_uri
         
     }
-    response = request.post(twitch_auth_url, params=params)
+    response = requests.post(twitch_auth_url, params=params)
     return response
 
 
