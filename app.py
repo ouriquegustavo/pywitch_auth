@@ -17,9 +17,8 @@ def index():
         'client_id': twitch_client_id,
         'client_secret': twitch_client_secret,
         'code': code,
-        'grant_type': 'authorization_code'
+        'grant_type': 'authorization_code',
         'redirect_uri': redirect_uri
-        
     }
     response = requests.post(twitch_auth_url, params=params)
     return response
