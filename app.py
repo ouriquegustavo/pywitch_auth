@@ -28,7 +28,7 @@ def index():
         'redirect_uri': redirect_uri
     }
     response = requests.post(twitch_auth_url, params=params)
-    if response.status_code==200
+    if response.status_code==200:
         code_dict['code'] = response.json()
         return response.json()
 
