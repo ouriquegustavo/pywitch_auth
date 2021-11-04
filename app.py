@@ -19,6 +19,7 @@ def get_code_data(code):
 
 @app.route('/')
 def index():
+    print(request.args)
     code = request.args.get('code')
     params = {
         'client_id': twitch_client_id,
