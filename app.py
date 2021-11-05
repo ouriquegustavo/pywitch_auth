@@ -10,17 +10,38 @@ redirect_uri = 'http://localhost:13486/token'
 
 app = Flask(__name__, '')
 
-code_dict={}
+state_dict={}
 
-@app.route('/<code>')
-def get_code_data(code):
-    return json.dumps(code_dict[code])
+error_invalid_state = {'status': 'Invalid state!'}
+error_missing_code = {'status': 'Missing code!'}
+error_missing_state = {'status': 'Missing state'}
+success_authenticate = {'status': 'Successfully authenticated!'}
+success_valid_state = {'status': 'Valid state!'}
+
+@app.route('/token/<state>')
+def get_token(state):
+    try:
+        if not state in state_dict:
+            return json.dumps(error_invalid_state)
+        state_data = json.loads(state_dict.pop(state))
+        state_data.update(success_valid_state)
+        return json.dumps(state_data)
+    except:
+        return json.dumps(error_invalid_state)
 
 
-@app.route('/')
+@app.route('/authenticate')
 def index():
     print(request.args)
     code = request.args.get('code')
+    state = request.args.get('state')
+    
+    if not code:
+        return 'Failed to authenticate PyWitch Client: Missing Code!'
+    
+    if not state or len(state) != 8:
+        return 'Failed to authenticate PyWitch Client: Missing state!'
+    
     params = {
         'client_id': twitch_client_id,
         'client_secret': twitch_client_secret,
@@ -30,8 +51,8 @@ def index():
     }
     response = requests.post(twitch_auth_url, params=params)
     if response.status_code==200:
-        code_dict['code'] = response.json()
-        return response.json()
+        state_dict[state] = response.json()
+        return 'Successfully authenticated PyWitch Client!'
 
 
 
