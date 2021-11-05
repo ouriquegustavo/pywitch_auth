@@ -26,6 +26,8 @@ def get_token():
         if not (state and state in state_dict):
             return json.dumps(error_invalid_state)
         state_data = state_dict.pop(state)
+        if time.time() > state_data['time']+60:
+             return json.dumps(error_invalid_state)
         state_data.update(success_valid_state)
         return json.dumps(state_data)
     except Exception as e:
@@ -54,7 +56,9 @@ def index():
     }
     response = requests.post(twitch_auth_url, params=params)
     if response.status_code==200:
-        state_dict[state] = response.json()
+        response_json = response.json()
+        response_json['time'] = time.time()
+        state_dict[state] = response_json
         return 'Successfully authenticated PyWitch Client!'
 
 
