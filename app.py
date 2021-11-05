@@ -19,7 +19,7 @@ error_missing_state = {'status': 'Missing state'}
 success_authenticate = {'status': 'Successfully authenticated!'}
 success_valid_state = {'status': 'Valid state!'}
 
-state_lenght = 128
+state_length = 128
 state_time_limit = 120
 
 
@@ -51,7 +51,7 @@ def index():
     if not state:
         return 'Failed to authenticate PyWitch Client: Missing state!'
 
-    if len(state) != state_lenght:
+    if len(state) != state_length:
         return 'Failed to authenticate PyWitch Client: Invalid state!'
 
     if state in state_dict:
