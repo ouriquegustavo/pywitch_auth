@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import requests
 from flask import Flask , request
 
@@ -18,15 +19,17 @@ error_missing_state = {'status': 'Missing state'}
 success_authenticate = {'status': 'Successfully authenticated!'}
 success_valid_state = {'status': 'Valid state!'}
 
-@app.route('/token/<state>')
-def get_token(state):
+@app.route('/token')
+def get_token():
     try:
-        if not state in state_dict:
+        state = request.args.get('state')
+        if not (state and state in state_dict):
             return json.dumps(error_invalid_state)
         state_data = json.loads(state_dict.pop(state))
         state_data.update(success_valid_state)
         return json.dumps(state_data)
-    except:
+    except Exception as e:
+        print(e)
         return json.dumps(error_invalid_state)
 
 
