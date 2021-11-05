@@ -19,6 +19,9 @@ error_missing_state = {'status': 'Missing state'}
 success_authenticate = {'status': 'Successfully authenticated!'}
 success_valid_state = {'status': 'Valid state!'}
 
+state_lenght=128
+state_time_limit=120
+
 @app.route('/state')
 def get_token():
     try:
@@ -26,7 +29,7 @@ def get_token():
         if not (state and state in state_dict):
             return json.dumps(error_invalid_state)
         state_data = state_dict.pop(state)
-        if time.time() > state_data['time']+60:
+        if time.time() > state_data['time']+state_time_limit:
              return json.dumps(error_invalid_state)
         state_data.update(success_valid_state)
         return json.dumps(state_data)
@@ -44,8 +47,16 @@ def index():
     if not code:
         return 'Failed to authenticate PyWitch Client: Missing Code!'
     
-    if not state or len(state) != 8:
+    if not state:
         return 'Failed to authenticate PyWitch Client: Missing state!'
+        
+    if len(state) != state_lenght:
+        return 'Failed to authenticate PyWitch Client: Invalid state!'
+        
+    if state in state_dict:
+        # If the same state is used more than one time, both are invalid!
+        state_dict.pop(state)
+        return 'Failed to authenticate PyWitch Client: Invalid state!'
     
     params = {
         'client_id': twitch_client_id,
