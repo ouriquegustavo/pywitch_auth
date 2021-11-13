@@ -28,15 +28,14 @@ success_valid_state = {'status': 'Valid state!'}
 state_length = 128
 state_time_limit = 120
 
+conn = psycopg2.connect(database_url, sslmode='require')
+cur = conn.cursor()
 
 @app.route('/create_table')
 def create_table():
     password = request.args.get('password')
     if database_pass != password:
         return "Invalid password"
-    conn = psycopg2.connect(database_url, sslmode='require')
-    cur = conn.cursor()
-    print(conn, cur)
     query = (   
         'begin;'
         'create table if not exists pywitch_users ('
@@ -48,8 +47,6 @@ def create_table():
         'commit;'
     )
     cur.execute(query)
-    
-    print(cur.fetchall())
     return 'Table created!'
 
 
@@ -110,16 +107,16 @@ def index():
         response_validation = requests.get(validation_url, headers=headers)
         if response.status_code == 200:
             response_validation_json = response.json()
-            data = response_validation_json.get('data',[{}])
-            print(data, response_validation_json)
-            params = {'id': data[0].get('id')}
+            params = {'id': response_validation_json.get('user_id')}
 
             response_user = requests.get(
                 helix_users_url, headers=headers, params=params
             )
 
             response_user_json = response_user.json()
-            display_name = response_user_json.get('display_name','')
+            data = response_user_json.get('data',[{}])
+            print(data)
+            display_name = data.get('display_name','')
 
         return (
             f'<p> Hi {display_name}!</p>'
