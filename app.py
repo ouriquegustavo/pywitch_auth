@@ -155,8 +155,7 @@ def index():
                 'login': login,
                 'display_name': display_name,
                 'auth_time': auth_time_tq,
-                
-            )
+            }
             cur.execute(query)
 
         return (
