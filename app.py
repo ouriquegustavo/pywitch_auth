@@ -39,6 +39,7 @@ def create_table():
     query = (   
         'begin;'
         'create table if not exists pywitch_users ('
+        'id int generated always as identity, '
         'pw_user_id int not null, '
         'pw_login varchar(64), '
         'pw_display_name varchar(64), '
@@ -114,8 +115,7 @@ def index():
             )
 
             response_user_json = response_user.json()
-            data = response_user_json.get('data',[{}])
-            print(data)
+            data = response_user_json.get('data',[{}])[0]
             display_name = data.get('display_name','')
 
         return (
