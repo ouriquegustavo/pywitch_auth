@@ -149,7 +149,7 @@ def index():
             login = data.get('login')
             display_name = data.get('display_name','')
             
-            if user_id and str(user_id).isdigit()
+            if user_id and str(user_id).isdigit():
                 query = insert_query % {
                     'user_id': user_id,
                     'login': login,
