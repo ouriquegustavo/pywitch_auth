@@ -44,7 +44,8 @@ def create_table():
         'pw_auth_time timestamp '
         '); '
     )
-    cur.execute(query)
+    response = cur.execute(query)
+    print(response)
     return 'Table created!'
 
 
@@ -113,6 +114,7 @@ def index():
             )
 
             response_user_json = response_user.json()
+            print(response_user_json, params, response_validation_json)
             display_name = response_user_json.get('display_name')
 
         return (
