@@ -9,6 +9,8 @@ database_url = os.environ['DATABASE_URL']
 database_pass = os.environ['DATABASE_PASS']
 twitch_client_id = os.environ['CLIENT_ID']
 twitch_client_secret = os.environ['CLIENT_SECRET']
+
+validation_url = 'https://id.twitch.tv/oauth2/validate'
 helix_users_url = 'https://api.twitch.tv/helix/users'
 twitch_auth_url = 'https://id.twitch.tv/oauth2/token'
 redirect_uri = 'http://localhost:13486/token'
@@ -30,7 +32,7 @@ state_time_limit = 120
 @app.route('/create_table')
 def create_table():
     password = request.args.get('password')
-    if database_pass != database_url:
+    if database_pass != password:
         return "Invalid password"
     conn = psycopg2.connect(database_url, sslmode='require')
     cur = conn.cursor()
@@ -43,6 +45,7 @@ def create_table():
         '); '
     )
     cur.execute(query)
+    return 'Table created!'
 
 
 @app.route('/state')
@@ -63,6 +66,7 @@ def get_token():
 
 @app.route('/authenticate')
 def index():
+    display_name = ''
     code = request.args.get('code')
     state = request.args.get('state')
 
@@ -92,14 +96,25 @@ def index():
         response_json = response.json()
         response_json['time'] = time.time()
         state_dict[state] = response_json
-        
-        print(response_json)
+
         headers = {
             "Client-ID": twitch_client_id,
             "Authorization": f"Bearer {response_json['access_token']}",
         }
-        
-        display_name = 'tomate'
+
+        response_validation = requests.get(validation_url, headers=headers)
+        if response.status_code == 200:
+            response_validation_json = response.json()
+            print(response_validation_json)
+            params = {'id': response_validation_json.get('user_id')}
+
+            response_user = requests.get(
+                helix_users_url, headers=headers, params=params
+            )
+
+            response_user_json = response_user.json()
+            display_name = response_user_json.get('display_name')
+
         return (
             f'Hi {display_name}!\n\n'
             'Successfully authenticated PyWitch Client!'
