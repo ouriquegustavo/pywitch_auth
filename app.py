@@ -1,14 +1,17 @@
 import os
 import json
 import time
+import psycopg2
 import requests
 from flask import Flask, request
 
+database_url = os.environ['DATABASE_URL']
+database_pass = os.environ['DATABASE_PASS']
 twitch_client_id = os.environ['CLIENT_ID']
 twitch_client_secret = os.environ['CLIENT_SECRET']
+helix_users_url = 'https://api.twitch.tv/helix/users'
 twitch_auth_url = 'https://id.twitch.tv/oauth2/token'
 redirect_uri = 'http://localhost:13486/token'
-validation_uri = "https://pywitch-auth-internal.herokuapp.com/validate"
 
 app = Flask(__name__, '')
 
@@ -22,6 +25,24 @@ success_valid_state = {'status': 'Valid state!'}
 
 state_length = 128
 state_time_limit = 120
+
+
+@app.route('/create_table')
+def create_table():
+    password = request.args.get('password')
+    if database_pass != database_url:
+        return "Invalid password"
+    conn = psycopg2.connect(database_url, sslmode='require')
+    cur = conn.cursor()
+    query = (
+        'create table if not exists pywitch_users ('
+        'pw_user_id int not null, '
+        'pw_login varchar(64), '
+        'pw_display_name varchar(64), '
+        'pw_auth_time timestamp '
+        '); '
+    )
+    cur.execute(query)
 
 
 @app.route('/state')
@@ -70,12 +91,15 @@ def index():
     if response.status_code == 200:
         response_json = response.json()
         response_json['time'] = time.time()
-        validation_response = requests.post(
-            validation_uri, data=json.dumps(response_json)
-        )
-        validation_response_json = validation_response.json()
-        display_name = validation_response_json.get('display_name')
         state_dict[state] = response_json
+        
+        print(response_json)
+        headers = {
+            "Client-ID": twitch_client_id,
+            "Authorization": f"Bearer {response_json['access_token']}",
+        }
+        
+        display_name = 'tomate'
         return (
             f'Hi {display_name}!\n\n'
             'Successfully authenticated PyWitch Client!'
