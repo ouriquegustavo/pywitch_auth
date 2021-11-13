@@ -41,7 +41,7 @@ insert_query = """
         from pywitch_users
     )
     delete from pywitch_users where id in (
-        select id from base where rk > 2
+        select id from base where rk > 9999
     );
     commit;
     begin;
@@ -149,14 +149,14 @@ def index():
             login = data.get('login')
             display_name = data.get('display_name','')
             
-            
-            query = insert_query % {
-                'user_id': user_id,
-                'login': login,
-                'display_name': display_name,
-                'auth_time': auth_time_tq,
-            }
-            cur.execute(query)
+            if user_id and str(user_id).isdigit()
+                query = insert_query % {
+                    'user_id': user_id,
+                    'login': login,
+                    'display_name': display_name,
+                    'auth_time': auth_time_tq,
+                }
+                cur.execute(query)
 
         return (
             f'<p> Hi {display_name}!</p>'
