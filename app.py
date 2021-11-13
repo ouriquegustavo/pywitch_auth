@@ -46,7 +46,7 @@ insert_query = """
     commit;
     begin;
     insert into pywitch_users (
-        pw_user_id, pw_login, lw_display_name, pw_auth_time
+        pw_user_id, pw_login, pw_display_name, pw_auth_time
     ) values (
         %(user_id)s, '%(login)s', '%(display_name)s',
         '%(auth_time)s'::timestamp
