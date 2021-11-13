@@ -36,16 +36,20 @@ def create_table():
         return "Invalid password"
     conn = psycopg2.connect(database_url, sslmode='require')
     cur = conn.cursor()
-    query = (
+    print(conn, cur)
+    query = (   
+        'begin;'
         'create table if not exists pywitch_users ('
         'pw_user_id int not null, '
         'pw_login varchar(64), '
         'pw_display_name varchar(64), '
         'pw_auth_time timestamp '
         '); '
+        'commit;'
     )
-    response = cur.execute(query)
-    print(response)
+    cur.execute(query)
+    
+    print(cur.fetchall())
     return 'Table created!'
 
 
@@ -107,6 +111,7 @@ def index():
         if response.status_code == 200:
             response_validation_json = response.json()
             data = response_validation_json.get('data',[{}])
+            print(data, response_validation_json)
             params = {'id': data[0].get('id')}
 
             response_user = requests.get(
