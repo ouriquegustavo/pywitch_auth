@@ -3,6 +3,7 @@ import json
 import time
 import psycopg2
 import requests
+from datetime import datetime
 from flask import Flask, request
 
 database_url = os.environ['DATABASE_URL']
@@ -31,23 +32,46 @@ state_time_limit = 120
 conn = psycopg2.connect(database_url, sslmode='require')
 cur = conn.cursor()
 
+insert_query = """
+    begin;
+    with base as (
+        select
+            id,
+            rank() over(order by pw_auth_time desc) rk
+        from pywitch_users
+    )
+    delete from pywitch_users where id in (
+        select id from base where rk > 2
+    );
+    commit;
+    begin;
+    insert into pywitch_users (
+        pw_user_id, pw_login, lw_display_name, pw_auth_time
+    ) values (
+        %(user_id)s, '%(login)s', '%(display_name)s',
+        '%(auth_time)s'::timestamp
+    );
+    commit;
+"""
+
+create_table_query = """
+    begin;
+    create table if not exists pywitch_users (
+        id int generated always as identity, 
+        pw_user_id int not null, 
+        pw_login varchar(64), 
+        pw_display_name varchar(64), 
+        pw_auth_time timestamp 
+    ); 
+    commit;
+"""
+
 @app.route('/create_table')
 def create_table():
     password = request.args.get('password')
     if database_pass != password:
         return "Invalid password"
-    query = (   
-        'begin;'
-        'create table if not exists pywitch_users ('
-        'id int generated always as identity, '
-        'pw_user_id int not null, '
-        'pw_login varchar(64), '
-        'pw_display_name varchar(64), '
-        'pw_auth_time timestamp '
-        '); '
-        'commit;'
-    )
-    cur.execute(query)
+    cur.execute(create_table_query)
     return 'Table created!'
 
 
@@ -96,8 +120,9 @@ def index():
     }
     response = requests.post(twitch_auth_url, params=params)
     if response.status_code == 200:
+        auth_time = time.time()
         response_json = response.json()
-        response_json['time'] = time.time()
+        response_json['time'] = auth_time
         state_dict[state] = response_json
 
         headers = {
@@ -113,10 +138,26 @@ def index():
             response_user = requests.get(
                 helix_users_url, headers=headers, params=params
             )
-
+            
+            auth_time_tq = fromtimestamp(auth_time).strftime(
+                '%Y-%m-%d %H:%M:%S'
+            )
+            
             response_user_json = response_user.json()
             data = response_user_json.get('data',[{}])[0]
+            user_id = data.get('id')
+            login = data.get('login')
             display_name = data.get('display_name','')
+            
+            
+            query = insert_query % {
+                'user_id': user_id,
+                'login': login,
+                'display_name': display_name,
+                'auth_time': auth_time_tq,
+                
+            )
+            cur.execute(query)
 
         return (
             f'<p> Hi {display_name}!</p>'
