@@ -139,7 +139,7 @@ def index():
                 helix_users_url, headers=headers, params=params
             )
             
-            auth_time_tq = fromtimestamp(auth_time).strftime(
+            auth_time_tq = datetime.fromtimestamp(auth_time).strftime(
                 '%Y-%m-%d %H:%M:%S'
             )
             
