@@ -8,6 +8,7 @@ twitch_client_id = os.environ['CLIENT_ID']
 twitch_client_secret = os.environ['CLIENT_SECRET']
 twitch_auth_url = 'https://id.twitch.tv/oauth2/token'
 redirect_uri = 'http://localhost:13486/token'
+validation_uri = "pywitch-auth-internal.herokuapp.com/validate"
 
 app = Flask(__name__, '')
 
@@ -70,8 +71,16 @@ def index():
     if response.status_code == 200:
         response_json = response.json()
         response_json['time'] = time.time()
+        validation_response = requests.post(
+            validation_uri, data=json.dumps(response_json)
+        )
+        validation_response_json = validation_response.json()
+        display_name = validation_response_json.get('display_name')
         state_dict[state] = response_json
-        return 'Successfully authenticated PyWitch Client!'
+        return (
+            f'Hi {display_name}!\n\n'
+            'Successfully authenticated PyWitch Client!'
+        )
 
 
 # teste heroku
