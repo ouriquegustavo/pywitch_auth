@@ -8,7 +8,7 @@ twitch_client_id = os.environ['CLIENT_ID']
 twitch_client_secret = os.environ['CLIENT_SECRET']
 twitch_auth_url = 'https://id.twitch.tv/oauth2/token'
 redirect_uri = 'http://localhost:13486/token'
-validation_uri = "pywitch-auth-internal.herokuapp.com/validate"
+validation_uri = "https://pywitch-auth-internal.herokuapp.com/validate"
 
 app = Flask(__name__, '')
 
@@ -42,7 +42,6 @@ def get_token():
 
 @app.route('/authenticate')
 def index():
-    print(request.args)
     code = request.args.get('code')
     state = request.args.get('state')
 
