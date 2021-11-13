@@ -106,20 +106,19 @@ def index():
         response_validation = requests.get(validation_url, headers=headers)
         if response.status_code == 200:
             response_validation_json = response.json()
-            print(response_validation_json)
-            params = {'id': response_validation_json.get('user_id')}
+            data = response_validation_json.get('data',[{}])
+            params = {'id': data[0].get('id')}
 
             response_user = requests.get(
                 helix_users_url, headers=headers, params=params
             )
 
             response_user_json = response_user.json()
-            print(response_user_json, params, response_validation_json)
-            display_name = response_user_json.get('display_name')
+            display_name = response_user_json.get('display_name','')
 
         return (
-            f'Hi {display_name}!\n\n'
-            'Successfully authenticated PyWitch Client!'
+            f'<p> Hi {display_name}!</p>'
+            '<p>Successfully authenticated PyWitch Client!</p>'
         )
 
 
