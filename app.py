@@ -66,6 +66,10 @@ create_table_query = """
     commit;
 """
 
+list_users_query = """
+    select distinct(pw_display_name) from pywitch_users;
+"""
+
 @app.route('/create_table')
 def create_table():
     password = request.args.get('password')
@@ -129,6 +133,8 @@ def index():
             "Client-ID": twitch_client_id,
             "Authorization": f"Bearer {response_json['access_token']}",
         }
+        
+        user_list=[]
 
         response_validation = requests.get(validation_url, headers=headers)
         if response.status_code == 200:
@@ -157,10 +163,19 @@ def index():
                     'auth_time': auth_time_tq,
                 }
                 cur.execute(query)
+                
+                cur.execute(list_users_query)
+                user_list_iter = cur.fetchall()
+                user_list = [i for i in user_list_iter]
+                
+        user_list_str = '\n'.join([f'<p>{user}</p>' for user in user_list])
 
         return (
             f'<p> Hi {display_name}!</p>'
             '<p>Successfully authenticated PyWitch Client!</p>'
+            '<p></p>'
+            '<p>Twitch users using PyWitch Auth:</p>'
+            f'{user_list_str}'
         )
 
 
