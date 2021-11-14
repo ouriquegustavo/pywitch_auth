@@ -166,7 +166,7 @@ def index():
                 
                 cur.execute(list_users_query)
                 user_list_iter = cur.fetchall()
-                user_list = [i for i in user_list_iter]
+                user_list = [i[0] for i in user_list_iter]
                 
         user_list_str = '\n'.join([f'<p>{user}</p>' for user in user_list])
 
