@@ -262,7 +262,7 @@ def index():
                 
         user_list_str = '\n'.join([f'<li>{i}</li>' for i in user_list])
         html = page_css + page_html.format(
-            display_name=display_name
+            display_name=display_name,
             user_list_str=user_list_str
         )
 
