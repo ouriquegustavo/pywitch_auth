@@ -32,6 +32,98 @@ state_time_limit = 120
 conn = psycopg2.connect(database_url, sslmode='require')
 cur = conn.cursor()
 
+page_css = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+    .AuthBox {
+      background-color: white;
+      width: 350px;
+      border: 50px solid #9147ff;
+      padding: 50px;
+      margin: auto;
+      padding-top: 30px;
+      padding-bottom: 2px;
+      text-align: center;
+    }
+    .row::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+"""
+
+page_html = """
+</style>
+</head>
+<body>
+
+<div class="AuthBox">
+    <div class="row">
+        <div style="float: left; width: 20%; padding: 10px">
+            <img src="https://raw.githubusercontent.com/ouriquegustavo
+                      /pywitch_client/main/logo/pywitch_logo_color.png"
+          alt="pywitch_logo_color" style="max-width:100%; max-height:100%;">
+        </div>
+        <div style="float: left;">
+            <h1>PyWitch Auth</h1>
+        </div>
+    </div>
+    
+    <div style="text-align: left;">
+        <h4>Hi {display_name}!</h4>
+    </div>
+
+    <div>
+        Successfully authenticated PyWitch Client!
+        <br> <br>
+        You can close this tab now.
+        <br> <br>
+        Your PyWitch Client will retrieve your access token soon.
+        If it was not able to start in 10-20 seconds, close it and try again.
+    </div>
+    
+    <br>
+    <br>
+    
+    <div style="text-align: left;">
+        <h4>Users that also used PyWitch Auth:</h4>
+        <ul>
+            {user_list_str}
+        </ul> 
+    </div>
+    I'm pretty sure that you will enjoy their livestreams!
+    
+    <div style="text-align: left;">
+        <h4>Source:</h4>
+    </div>
+    <div>
+        <a href="https://github.com/ouriquegustavo/pywitch/">
+        [PyWitch Source Code]</a>
+    </div>
+    <br>
+    <div>
+        <a href="https://github.com/ouriquegustavo/pywitch_auth/">
+        [PyWitch Auth Source Code]</a>
+    </div>
+    <br>
+    <div>
+        <a href="https://github.com/ouriquegustavo/pywitch_client/">
+        [PyWitch Client Source Code]</a>
+    </div>
+    
+    <div style="text-align: right; padding-right: 2px; font-size: 12px;">
+        <br><br>
+        Author: Gustavo Ourique (Gleenus)
+    </div>
+        
+</div>
+
+</body>
+</html>
+"""
+
 insert_query = """
     begin;
     with base as (
@@ -168,15 +260,13 @@ def index():
                 user_list_iter = cur.fetchall()
                 user_list = [i[0] for i in user_list_iter]
                 
-        user_list_str = '\n'.join([f'<p>{user}</p>' for user in user_list])
-
-        return (
-            f'<p> Hi {display_name}!</p>'
-            '<p>Successfully authenticated PyWitch Client!</p>'
-            '<p></p>'
-            '<p>Twitch users using PyWitch Auth:</p>'
-            f'{user_list_str}'
+        user_list_str = '\n'.join([f'<li>{i}</li>' for i in user_list])
+        html = page_css + page_html.format(
+            display_name=display_name
+            user_list_str=user_list_str
         )
+
+        return html
 
 
 # teste heroku
