@@ -36,8 +36,10 @@ page_css = """
     <!DOCTYPE html>
     <html>
     <head>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400" rel="stylesheet">
     <style>
     .AuthBox {
+      font-family: 'Poppins', sans-serif;
       background-color: white;
       width: 350px;
       border: 50px solid #9147ff;
@@ -52,11 +54,11 @@ page_css = """
       clear: both;
       display: table;
     }
+    </style>
+    </head>
 """
 
 page_html = """
-</style>
-</head>
 <body>
 
 <div class="AuthBox">
