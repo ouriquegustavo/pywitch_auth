@@ -5,6 +5,7 @@ import psycopg2
 import requests
 from datetime import datetime
 from flask import Flask, request
+from _version import version
 
 database_url = os.environ['DATABASE_URL']
 database_pass = os.environ['DATABASE_PASS']
@@ -23,8 +24,10 @@ state_dict = {}
 error_invalid_state = {'status': 'Invalid state!'}
 error_missing_code = {'status': 'Missing code!'}
 error_missing_state = {'status': 'Missing state'}
+error_refresh_state = {'status': 'Failed to refresh access token'}
 success_authenticate = {'status': 'Successfully authenticated!'}
 success_valid_state = {'status': 'Valid state!'}
+success_refresh = {'status': 'Token refreshed successfully!'}
 
 state_length = 128
 state_time_limit = 120
@@ -269,6 +272,30 @@ def index():
         )
 
         return html
+        
+@app.route('/refresh')
+def refresh_access_token():
+    try:
+        refresh_token = request.args.get('refresh_token')
+
+        if not refresh_token:
+            return 'Failed to authenticate PyWitch Client: Missing Refresh Token!'
+
+        data = {
+            'client_id': twitch_client_id,
+            'client_secret': twitch_client_secret,
+            'refresh_token': refresh_token
+            'grant_type': 'refresh_token',
+        }
+        response = requests.post(twitch_auth_url, data=data)
+        if response.status_code == 200:
+            response_json = response.json()
+            response_json.update(success_refresh)
+            return json.dumps(response_json) 
+            
+        return json.dumps(error_refresh_state)
+    except Exception as e:
+        print(e)
 
 
 # teste heroku
