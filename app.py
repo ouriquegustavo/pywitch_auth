@@ -284,8 +284,8 @@ def refresh_access_token():
         data = {
             'client_id': twitch_client_id,
             'client_secret': twitch_client_secret,
-            'refresh_token': refresh_token
             'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
         }
         response = requests.post(twitch_auth_url, data=data)
         if response.status_code == 200:
