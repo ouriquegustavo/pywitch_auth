@@ -276,7 +276,7 @@ def index():
 @app.route('/refresh')
 def refresh_access_token():
     try:
-        refresh_token = request.args.get('refresh_token')
+        refresh_token = request.headers.get('refresh_token')
 
         if not refresh_token:
             return 'Failed to authenticate PyWitch Client: Missing Refresh Token!'
@@ -288,11 +288,11 @@ def refresh_access_token():
             'refresh_token': refresh_token,
         }
         response = requests.post(twitch_auth_url, data=data)
+        print(response, response.content)
         if response.status_code == 200:
             response_json = response.json()
             response_json.update(success_refresh)
             return json.dumps(response_json) 
-            
         return json.dumps(error_refresh_state)
     except Exception as e:
         print(e)
