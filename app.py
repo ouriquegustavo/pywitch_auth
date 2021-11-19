@@ -164,6 +164,7 @@ list_users_query = """
     with base as (
         select
             pw_display_name,
+            pw_auth_time,
             rank() over(
                 partition by pw_login order by pw_auth_time desc
             ) as rk
