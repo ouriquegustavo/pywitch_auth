@@ -161,7 +161,15 @@ create_table_query = """
 """
 
 list_users_query = """
-    select distinct(pw_display_name) from pywitch_users;
+    with base as (
+        select
+            pw_display_name,
+            rank() over(
+                partition by pw_login order by pw_auth_time desc
+            ) as rk
+            from pywitch_users
+        )
+    select pw_display_name from base where rk=1 order by pw_auth_time desc;
 """
 
 @app.route('/create_table')
